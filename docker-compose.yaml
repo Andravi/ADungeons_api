@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres
+    container_name: postgres
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: adungeons
+    ports:
+      - "5432:5432"
+    #volumes:
+    #  - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "8080:80"
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+
+  # app:  # Adicione seu serviço Flask aqui
+  #   build: .
+  #   ports:
+  #     - "5000:5000"
+  #   environment:
+  #     - FLASK_ENV=development
+  #   volumes:
+  #     - .:/app
+  #   depends_on:
+  #     - postgres
+  #   networks:
+  #     - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+#volumes:
+#  postgres_data:
