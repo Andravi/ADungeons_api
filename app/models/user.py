@@ -2,15 +2,19 @@ import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import db
 
-class User(db.Model):
-    __tablename__ = 'users'
+class Usuario(db.Model):
+    __tablename__ = 'usuario'
     
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(256))
     is_active = db.Column(db.Boolean(), default=True)
     last_login = db.Column(db.DateTime, nullable=True)
+    
+    # Relações
+    campanhas_mestradas = db.relationship('Campanha', backref='mestre', lazy=True)
+    personagens = db.relationship('Jogador', backref='usuario', lazy=True)
     
     
     def update_last_login(self):
@@ -33,3 +37,4 @@ class User(db.Model):
             'email': self.email,
             'last_login_at': self.last_login.isoformat() if self.last_login else None
         }
+        
