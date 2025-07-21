@@ -1,5 +1,4 @@
 
-from werkzeug.security import generate_password_hash, check_password_hash
 from app import db
 
 class Entidade(db.Model):
@@ -15,6 +14,8 @@ class Entidade(db.Model):
     qnt_deslocamento = db.Column(db.SmallInteger)
     qnt_campo_visao = db.Column(db.SmallInteger)
 
+    # Relação com campanhas (via tabela associativa)
+    campanhas = db.relationship('EntidadeEmCampanha', back_populates='entidade', cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<Entidade(id={self.id}, nome='{self.nome}', pos=({self.pos_x}, {self.pos_y}, {self.pos_z}))>"
