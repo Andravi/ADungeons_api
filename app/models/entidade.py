@@ -15,7 +15,7 @@ class Entidade(db.Model):
     qnt_campo_visao = db.Column(db.SmallInteger)
 
     # Relação com campanhas (via tabela associativa)
-    campanhas = db.relationship('EntidadeEmCampanha', back_populates='entidade', cascade="all, delete-orphan")
+    #campanhas = db.relationship('EntidadeEmCampanha', back_populates='entidade', cascade="all, delete-orphan", lazy=True)
 
     def __repr__(self):
         return f"<Entidade(id={self.id}, nome='{self.nome}', pos=({self.pos_x}, {self.pos_y}, {self.pos_z}))>"

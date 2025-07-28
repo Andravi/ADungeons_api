@@ -8,10 +8,10 @@ from flask_jwt_extended import (
     get_jwt_identity
 )
 
-auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
-main_bp = Blueprint('main', __name__)
+auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
+main_bp = Blueprint('main', __name__, url_prefix='/api')
 
-@auth_bp.route('/register', methods=['POST'])
+@main_bp.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
     
@@ -73,10 +73,10 @@ def protected():
         'usuario': usuario.to_dict()
     }), 200
 
-@main_bp.route('/users', methods=['GET'])
+@main_bp.route('/testes', methods=['GET'])
 # @jwt_required()
 def get_users():
-    users = Usuario.query.all()
+    # users = Usuario.query.all()
     return jsonify({
-        'users': [usuario.to_dict() for usuario in users]
+        'users': "[usuario.to_dict() for usuario in users]"
     }), 200

@@ -6,3 +6,5 @@ python-dotenv
 werkzeug
 pyjwt
 flask-jwt-extended
+requests
+pytest
