@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from werkzeug.security import generate_password_hash
+from app.models.campanha import Campanha
 from app.models.usuario import Usuario
 from app import db, jwt
 from flask_jwt_extended import (
@@ -114,21 +115,47 @@ def change_password():
         return jsonify({"message": f"Erro ao atualizar senha: {str(e)}"}), 500
 
 
-@main_bp.route('/protected', methods=['GET'])
+@auth_bp.route('/campanhas', methods=['POST'])
 @jwt_required()
-def protected():
-    current_user_id = get_jwt_identity()
-    usuario = Usuario.query.get(current_user_id)
-    
-    return jsonify({
-        'message': 'Acesso autorizado',
-        'usuario': usuario.to_dict()
-    }), 200
+def criar_campanha_autenticada():
+    try:
+        if not request.is_json:
+            return jsonify({"error": "Content-Type deve ser application/json"}), 415
 
-@main_bp.route('/testes', methods=['GET'])
-# @jwt_required()
-def get_users():
-    # users = Usuario.query.all()
+        data = request.get_json()
+        user_id = get_jwt_identity()  # ID do usuário do token JWT
+
+        if not data.get('name'):
+            return jsonify({"error": "Nome da campanha é obrigatório"}), 400
+
+        nova_campanha = Campanha(
+            nome=data['name'],
+            descricao=data.get('descricao', ''),
+            id_mestre=user_id  # Associa ao usuário autenticado
+        )
+
+        db.session.add(nova_campanha)
+        db.session.commit()
+
+        return jsonify({
+            "message": "Campanha criada com sucesso",
+            "campanha": {
+                "id": nova_campanha.id,
+                "nome": nova_campanha.nome,
+                "mestre": user_id
+            }
+        }), 201
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+
+@jwt.unauthorized_loader
+def missing_auth_header_callback(error_string):
     return jsonify({
-        'users': "[usuario.to_dict() for usuario in users]"
-    }), 200
+        "status": "error",
+        "message": "Autenticação necessária, Acesso restrito a mestres logados",
+        "details": "Por favor, inclua o token JWT no cabeçalho Authorization",
+        "error_code": f"AUTH_HEADER_MISSING - {error_string}"
+    }), 401

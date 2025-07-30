@@ -16,7 +16,8 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
-    
+    app.config['JSON_AS_ASCII'] = False  # Aqui está a solução
+
     from app.routes import auth_bp, main_bp
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
