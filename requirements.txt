@@ -4,7 +4,7 @@ flask-migrate
 psycopg2-binary
 python-dotenv
 werkzeug
-pyjwt
+pyjwt<2.10
 flask-jwt-extended
 requests
 pytest

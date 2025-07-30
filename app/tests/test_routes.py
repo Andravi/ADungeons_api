@@ -20,9 +20,9 @@ def user_data():
     )
     assert response.status_code == 201, "Falha ao criar usuário para teste"
 
-    yield user  # Entrega o usuário para o teste
+    yield user  # TEstes usam e depois de finalizarem retorna para baixo
 
-    # Limpeza: Remove o usuário após o teste
+    # Limpeza
     requests.delete(f"{BASE_URL}/users/{user['email']}")  # Ajuste para sua rota de deleção
 
 @pytest.fixture
@@ -54,44 +54,44 @@ def test_login_conta_cadastrada(user_data):
     response = requests.post(
         f"{BASE_URL}/login",  # Ajuste para seu endpoint
         json={
-            "email": user_data["email"],
+            "username": user_data["username"],
             "password": user_data["password"]
         }
     )
     assert response.status_code == 200
     assert "access_token" in response.json()
 
-# # CT6 - Teste de alteração de senha
-# def test_alterar_senha(user_data):
-#     """Testa o fluxo completo de alteração de senha"""
-#     # Login para obter token
-#     login = requests.post(
-#         f"{BASE_URL}/login",
-#         json={
-#             "email": user_data["email"],
-#             "password": user_data["password"]
-#         }
-#     )
-#     token = login.json()["access_token"]
+# CT6 - Teste de alteração de senha
+def test_alterar_senha(user_data):
+    """Testa o fluxo completo de alteração de senha"""
+    # Login para obter token
+    login = requests.post(
+        f"{BASE_URL}/login",
+        json={
+            "username": user_data["username"],
+            "password": user_data["password"]
+        }
+    )
+    token = login.json()["access_token"]
 
-#     # Alteração de senha
-#     new_password = "novaSenhaSegura123"
-#     response = requests.put(
-#         f"{BASE_URL}/user/password",  # Ajuste endpoint
-#         headers={"Authorization": f"Bearer {token}"},
-#         json={
-#             "current_password": user_data["password"],
-#             "new_password": new_password
-#         }
-#     )
-#     assert response.status_code == 200
+    # Alteração de senha
+    new_password = "novaSenhaSegura123"
+    response = requests.put(
+        f"{BASE_URL}/auth/user/password",  # Ajuste endpoint
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "current_password": user_data["password"],
+            "new_password": new_password
+        }
+    )
+    assert response.status_code == 200
 
-#     # Verifica se login com nova senha funciona
-#     response = requests.post(
-#         f"{BASE_URL}/login",
-#         json={
-#             "email": user_data["email"],
-#             "password": new_password
-#         }
-#     )
-#     assert response.status_code == 200
+    # Verifica se login com nova senha funciona
+    response = requests.post(
+        f"{BASE_URL}/login",
+        json={
+            "username": user_data["username"],
+            "password": new_password
+        }
+    )
+    assert response.status_code == 200

@@ -40,7 +40,25 @@ def register():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-@auth_bp.route('/login', methods=['POST'])
+
+@main_bp.route('users/<string:email>', methods=['DELETE'])
+def delete_user(email):
+    try:
+        # Busca e deleta o usuário diretamente
+        user = Usuario.query.filter_by(email=email).first()
+        if not user:
+            return jsonify({"message": "Usuário não encontrado"}), 404
+        
+        db.session.delete(user)
+        db.session.commit()
+        return jsonify({"message": f"Usuário {email} deletado com sucesso"}), 200
+    
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"message": f"Erro ao deletar usuário: {str(e)}"}), 500
+
+
+@main_bp.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
     
@@ -61,6 +79,40 @@ def login():
         'access_token': access_token,
         'usuario': usuario.to_dict()
     }), 200
+
+
+@auth_bp.route('/user/password', methods=['PUT'])
+@jwt_required()
+def change_password():
+    # 1. Pegar dados da requisição
+    data = request.get_json()
+    current_password = data.get('current_password')
+    new_password = data.get('new_password')
+
+    # 2. Validações básicas
+    if not all([current_password, new_password]):
+        return jsonify({"message": "Senha atual e nova senha são obrigatórias"}), 400
+
+    # 3. Identificar usuário
+    user_email = get_jwt_identity()
+    user = Usuario.query.filter_by(id=user_email).first()
+
+    if not user:
+        return jsonify({"message": "Usuário não encontrado"}), 404
+
+    # 4. Verificar senha atual
+    if not user.check_password(current_password):
+        return jsonify({"message": "Senha atual incorreta"}), 401
+
+    # 5. Atualizar senha
+    try:
+        user.set_password(new_password)
+        db.session.commit()
+        return jsonify({"message": "Senha alterada com sucesso"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"message": f"Erro ao atualizar senha: {str(e)}"}), 500
+
 
 @main_bp.route('/protected', methods=['GET'])
 @jwt_required()
